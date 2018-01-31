@@ -14,11 +14,8 @@ defmodule Transport.DataValidation.Aggregates.ProjectTest do
     {:ok, query: query, command: command}
   end
 
-  test "find a project", %{query: query} do
-    use_cassette "data_validation/aggregates/project/find_project" do
-      assert {:noreply, project} = Project.handle_cast({:find_project, query}, %Project{})
-      refute is_nil(project.id)
-    end
+  test "find a project" do
+    assert {:reply, {:ok, project}, project} = Project.handle_call({:find_project}, nil, %Project{id: "1"})
   end
 
   describe "create a project" do
@@ -32,6 +29,13 @@ defmodule Transport.DataValidation.Aggregates.ProjectTest do
     test "when the project already exists it serves it from memory", %{command: command} do
       assert {:noreply, project} = Project.handle_cast({:create_project, command}, %Project{id: "1"})
       assert project.id == "1"
+    end
+  end
+
+  test "populate a project", %{query: query} do
+    use_cassette "data_validation/aggregates/project/populate_project" do
+      assert {:noreply, project} = Project.handle_cast({:populate_project, query}, %Project{})
+      refute is_nil(project.id)
     end
   end
 end
